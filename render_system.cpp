@@ -62,7 +62,7 @@ void render_system::create_pipeline(VkRenderPass render_pass)
     );
 }
 
-void render_system::render_game_objects(VkCommandBuffer command_buffer, vector<game_object> &objects)
+void render_system::render_game_objects(VkCommandBuffer command_buffer, vector<game_object> &objects, const camera &camera_)
 {
     this->pipeline_->bind(command_buffer);
 
@@ -73,7 +73,7 @@ void render_system::render_game_objects(VkCommandBuffer command_buffer, vector<g
         push_constant_data push{};
 
         push.color = obj.color;
-        push.transform = obj.transform_.mat4();
+        push.transform = camera_.get_projection() * obj.transform_.mat4();
 
         vkCmdPushConstants(
             command_buffer,

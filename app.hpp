@@ -5,6 +5,7 @@
 #ifndef VK_BASICS_APP_HPP
 #define VK_BASICS_APP_HPP
 
+#include "camera.hpp"
 #include "window.hpp"
 #include "model.hpp"
 #include "game_object.hpp"

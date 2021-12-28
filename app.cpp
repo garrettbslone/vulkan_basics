@@ -22,12 +22,19 @@ app::~app()
 void app::run()
 {
     render_system system{this->device_, this->renderer_.get_swap_chain_render_pass()};
+    camera c{};
+
+
     while (!this->window_.close()) {
         glfwPollEvents();
 
+        float aspect = renderer_.get_aspect_ratio();
+//            c.set_orthographic_projection(-aspect, aspect, -1, 1, -1, 1);
+        c.set_perspective_projection(glm::radians(45.f), aspect, 0.1f, 10.f);
+
         if (auto command_buffer = renderer_.begin_frame()) {
             renderer_.begin_swap_chain_render_pass(command_buffer);
-            system.render_game_objects(command_buffer, this->game_objects);
+            system.render_game_objects(command_buffer, this->game_objects, c);
             renderer_.end_swap_chain_render_pass(command_buffer);
             renderer_.end_frame();
         }
@@ -103,7 +110,7 @@ void app::load_game_objects()
 
     auto cube = game_object::create_game_object();
     cube.model_ = cube_model;
-    cube.transform_.translation = {0.f, 0.f, 0.5f};
+    cube.transform_.translation = {0.f, 0.f, -5.f};
     cube.transform_.scale = {0.5f, 0.5f, 0.5f};
 
     this->game_objects.push_back(move(cube));

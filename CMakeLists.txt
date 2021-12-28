@@ -3,7 +3,7 @@ project(vk_basics)
 
 set(CMAKE_CXX_STANDARD 17)
 
-add_executable(vk_basics main.cpp app.cpp app.hpp window.cpp window.hpp pipeline.cpp pipeline.hpp device.cpp device.hpp swap_chain.cpp swap_chain.hpp model.cpp model.hpp game_object.cpp game_object.hpp renderer.cpp renderer.hpp render_system.cpp render_system.hpp)
+add_executable(vk_basics main.cpp app.cpp app.hpp window.cpp window.hpp pipeline.cpp pipeline.hpp device.cpp device.hpp swap_chain.cpp swap_chain.hpp model.cpp model.hpp game_object.cpp game_object.hpp renderer.cpp renderer.hpp render_system.cpp render_system.hpp camera.cpp camera.hpp)
 
 add_subdirectory(glfw-3.3.6/glfw-3.3.6)
 

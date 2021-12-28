@@ -22,6 +22,7 @@ public:
     renderer(const renderer &) = delete;
     renderer &operator=(const renderer &) = delete;
 
+    float get_aspect_ratio() const { return swap_chain_->extentAspectRatio(); }
     bool is_frame_in_progress() const { return this->is_frame_started; }
     VkCommandBuffer get_current_command_buffer() const
     {

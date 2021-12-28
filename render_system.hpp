@@ -5,6 +5,7 @@
 #ifndef VK_BASICS_RENDER_SYSTEM_HPP
 #define VK_BASICS_RENDER_SYSTEM_HPP
 
+#include "camera.hpp"
 #include "window.hpp"
 #include "pipeline.hpp"
 #include "model.hpp"
@@ -21,9 +22,7 @@ public:
     render_system(const render_system &) = delete;
     render_system &operator=(const render_system &) = delete;
 
-    void run();
-
-    void render_game_objects(VkCommandBuffer command_buffer, vector<game_object> &objects);
+    void render_game_objects(VkCommandBuffer command_buffer, vector<game_object> &objects, const camera &camera_);
 
 private:
     void create_pipeline_layout();
