@@ -66,14 +66,13 @@ void render_system::render_game_objects(VkCommandBuffer command_buffer, vector<g
 {
     this->pipeline_->bind(command_buffer);
 
-    for (auto &obj: objects) {
-        obj.transform_.rotation.y = glm::mod(obj.transform_.rotation.y + 0.0001f, glm::two_pi<float>());
-        obj.transform_.rotation.x = glm::mod(obj.transform_.rotation.x + 0.00005f, glm::two_pi<float>());
+    auto projection_view = camera_.get_view() * camera_.get_projection();
 
+    for (auto &obj: objects) {
         push_constant_data push{};
 
         push.color = obj.color;
-        push.transform = camera_.get_projection() * obj.transform_.mat4();
+        push.transform = projection_view * obj.transform_.mat4();
 
         vkCmdPushConstants(
             command_buffer,

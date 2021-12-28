@@ -27,6 +27,8 @@ public:
     bool is_framebuffer_resized() const;
     void set_framebuffer_resized(bool framebuffer_resized);
 
+    GLFWwindow *get_GLFWWindow() const { return this->w; }
+
 private:
     void init();
 
