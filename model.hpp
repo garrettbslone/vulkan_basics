@@ -21,7 +21,12 @@ public:
         static std::vector<VkVertexInputAttributeDescription> get_attribute_descriptions();
     };
 
-    model(device *dev, const std::vector<vertex> &vertices);
+    struct builder {
+        std::vector<vertex> vertices{};
+        std::vector<uint32_t> indices{};
+    };
+
+    model(device *dev, const builder &b);
     virtual ~model();
 
     model(const model &) = delete;
@@ -32,11 +37,17 @@ public:
 
 private:
     void create_vertex_buffers(const std::vector<vertex> &vertices);
+    void create_index_buffers(const std::vector<uint32_t> &indices);
 
     device *device_;
     VkBuffer vertex_buffer;
     VkDeviceMemory vertex_buffer_memory;
     uint32_t vertex_count;
+
+    bool has_index_buffer = false;
+    VkBuffer index_buffer;
+    VkDeviceMemory index_buffer_memory;
+    uint32_t index_count;
 };
 
 #endif //VK_BASICS_MODEL_HPP
