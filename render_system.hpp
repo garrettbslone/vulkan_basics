@@ -11,6 +11,7 @@
 #include "model.hpp"
 #include "game_object.hpp"
 #include "renderer.hpp"
+#include "frame_info.hpp"
 
 #include <memory>
 
@@ -22,7 +23,7 @@ public:
     render_system(const render_system &) = delete;
     render_system &operator=(const render_system &) = delete;
 
-    void render_game_objects(VkCommandBuffer command_buffer, vector<game_object> &objects, const camera &camera_);
+    void render_game_objects(frame_info &info, vector<game_object> &objects);
 
 private:
     void create_pipeline_layout();

@@ -6,6 +6,7 @@
 #define VK_BASICS_MODEL_HPP
 
 #include "device.hpp"
+#include "buffer.hpp"
 
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
@@ -34,7 +35,7 @@ public:
         std::vector<vertex> vertices{};
         std::vector<uint32_t> indices{};
 
-        void load_model(const std::string & path);
+        void load_model(const std::string &path);
     };
 
     model(device *dev, const builder &b);
@@ -53,13 +54,11 @@ private:
     void create_index_buffers(const std::vector<uint32_t> &indices);
 
     device *device_;
-    VkBuffer vertex_buffer;
-    VkDeviceMemory vertex_buffer_memory;
+    std::unique_ptr<buffer> vertex_buffer;
     uint32_t vertex_count;
 
     bool has_index_buffer = false;
-    VkBuffer index_buffer;
-    VkDeviceMemory index_buffer_memory;
+    std::unique_ptr<buffer> index_buffer;
     uint32_t index_count;
 };
 

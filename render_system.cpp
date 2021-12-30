@@ -62,11 +62,11 @@ void render_system::create_pipeline(VkRenderPass render_pass)
     );
 }
 
-void render_system::render_game_objects(VkCommandBuffer command_buffer, vector<game_object> &objects, const camera &camera_)
+void render_system::render_game_objects(frame_info &info, vector<game_object> &objects)
 {
-    this->pipeline_->bind(command_buffer);
+    this->pipeline_->bind(info.command_buffer);
 
-    auto projection_view = camera_.get_projection() * camera_.get_view();
+    auto projection_view = info.c.get_projection() * info.c.get_view();
 
     for (auto &obj: objects) {
         push_constant_data push{};
@@ -76,14 +76,14 @@ void render_system::render_game_objects(VkCommandBuffer command_buffer, vector<g
         push.normal_matrix = obj.transform_.normal_matrix();
 
         vkCmdPushConstants(
-            command_buffer,
+            info.command_buffer,
             pipeline_layout,
             VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
             0,
             sizeof(push_constant_data),
             &push);
 
-        obj.model_->bind(command_buffer);
-        obj.model_->draw(command_buffer);
+        obj.model_->bind(info.command_buffer);
+        obj.model_->draw(info.command_buffer);
     }
 }

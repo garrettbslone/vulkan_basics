@@ -13,6 +13,11 @@
 
 #include <chrono>
 
+struct global_ubo {
+    glm::mat4 projection_view{1.f};
+    glm::vec3 light_direction = glm::normalize(glm::vec3{1.f, -3.f, -1.f});
+};
+
 app::app()
 {
     load_game_objects();
@@ -24,6 +29,17 @@ app::~app()
 
 void app::run()
 {
+    vector<unique_ptr<buffer>> ubo_buffers{swap_chain::MAX_FRAMES_IN_FLIGHT};
+    for (auto i = 0; i < ubo_buffers.size(); i++) {
+        ubo_buffers[i] = make_unique<buffer>(
+            device_,
+            sizeof(global_ubo),
+            1,
+            VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+            VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
+        ubo_buffers[i]->map();
+    }
+
     render_system system{this->device_, this->renderer_.get_swap_chain_render_pass()};
     camera c{};
 //    c.set_view_direction(glm::vec3(0.f), glm::vec3(0.5f, 0.f, 10.f));
@@ -49,8 +65,23 @@ void app::run()
         c.set_perspective_projection(glm::radians(50.f), aspect, 0.1f, 10.f);
 
         if (auto command_buffer = renderer_.begin_frame()) {
+            int frame_index = renderer_.get_frame_index();
+            frame_info info = {
+                    frame_index,
+                    frame_time,
+                    command_buffer,
+                    c
+            };
+
+            // update
+            global_ubo ubo{};
+            ubo.projection_view = c.get_projection() * c.get_view();
+            ubo_buffers[frame_index]->writeToBuffer(&ubo);
+            ubo_buffers[frame_index]->flush();
+
+            // render
             renderer_.begin_swap_chain_render_pass(command_buffer);
-            system.render_game_objects(command_buffer, this->game_objects, c);
+            system.render_game_objects(info, this->game_objects);
             renderer_.end_swap_chain_render_pass(command_buffer);
             renderer_.end_frame();
         }
