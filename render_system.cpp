@@ -11,7 +11,7 @@
 
 struct push_constant_data {
     glm::mat4 transform{1.f};
-    alignas(16) glm::vec3 color;
+    glm::mat4 normal_matrix{1.f};
 };
 
 render_system::render_system(device &d, VkRenderPass render_pass)
@@ -66,16 +66,14 @@ void render_system::render_game_objects(VkCommandBuffer command_buffer, vector<g
 {
     this->pipeline_->bind(command_buffer);
 
-    auto projection_view = camera_.get_view() * camera_.get_projection();
+    auto projection_view = camera_.get_projection() * camera_.get_view();
 
     for (auto &obj: objects) {
-//        obj.transform_.rotation.y = glm::mod(obj.transform_.rotation.y + 0.0001f, glm::two_pi<float>());
-//        obj.transform_.rotation.x = glm::mod(obj.transform_.rotation.x + 0.00005f, glm::two_pi<float>());
-
         push_constant_data push{};
 
-        push.color = obj.color;
-        push.transform = projection_view * obj.transform_.mat4();
+        auto model_matrix = obj.transform_.mat4();
+        push.transform = projection_view * model_matrix;
+        push.normal_matrix = obj.transform_.normal_matrix();
 
         vkCmdPushConstants(
             command_buffer,

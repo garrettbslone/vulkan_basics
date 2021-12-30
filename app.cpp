@@ -65,7 +65,7 @@ void app::load_game_objects()
 
     auto cube = game_object::create_game_object();
     cube.model_ = cube_model;
-    cube.transform_.translation = {0.f, 0.f, 2.5f};
+    cube.transform_.translation = {0.f, 0.5f, 2.5f};
     cube.transform_.scale = {2.5f, 2.5f, 2.5f};
 
     this->game_objects.push_back(move(cube));
