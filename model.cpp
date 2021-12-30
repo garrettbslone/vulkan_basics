@@ -3,9 +3,28 @@
 //
 
 #include "model.hpp"
+#include "utils.hpp"
 
+#define TINYOBJLOADER_IMPLEMENTATION
+#include <tinyobjloader/tiny_obj_loader.h>
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/hash.hpp>
+
+#include <unordered_map>
 #include <cassert>
 #include <cstring>
+
+namespace std {
+template<>
+struct hash<model::vertex> {
+    size_t operator()(model::vertex const &v) const
+    {
+        size_t seed = 0;
+        hashCombine(seed, v.position, v.color, v.normal, v.uv);
+        return seed;
+    }
+};
+}
 
 std::vector<VkVertexInputBindingDescription> model::vertex::get_binding_descriptions()
 {
@@ -51,6 +70,13 @@ model::~model()
         vkDestroyBuffer(this->device_->dev(), index_buffer, nullptr);
         vkFreeMemory(this->device_->dev(), index_buffer_memory, nullptr);
     }
+}
+
+std::unique_ptr<model> model::create_model_from_file(device &d, const std::string &path)
+{
+    builder b{};
+    b.load_model(path);
+    return std::make_unique<model>(&d, b);
 }
 
 void model::bind(VkCommandBuffer command_buffer)
@@ -143,4 +169,63 @@ void model::create_index_buffers(const std::vector<uint32_t> &indices)
 
     vkDestroyBuffer(this->device_->dev(), staging_buffer, nullptr);
     vkFreeMemory(this->device_->dev(), staging_buffer_memory, nullptr);
+}
+
+void model::builder::load_model(const std::string &path)
+{
+    tinyobj::attrib_t attrib;
+    std::vector<tinyobj::shape_t> shapes;
+    std::vector<tinyobj::material_t> materials;
+    std::string warn, err;
+
+    if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, path.c_str())) {
+        throw std::runtime_error(warn + err);
+    }
+
+    vertices.clear();
+    indices.clear();
+
+    std::unordered_map<vertex, uint32_t> unique_vertices{};
+
+    for (const auto &shape: shapes) {
+        for (const auto &index: shape.mesh.indices) {
+            vertex v{};
+
+            if (index.vertex_index >= 0) {
+                v.position = {
+                    attrib.vertices[3 * index.vertex_index + 0],
+                    attrib.vertices[3 * index.vertex_index + 1],
+                    attrib.vertices[3 * index.vertex_index + 2]
+                };
+
+                v.color = {
+                    attrib.colors[3 * index.vertex_index + 0],
+                    attrib.colors[3 * index.vertex_index + 1],
+                    attrib.colors[3 * index.vertex_index + 2]
+                };
+            }
+
+            if (index.normal_index >= 0) {
+                v.normal = {
+                    attrib.normals[3 * index.normal_index + 0],
+                    attrib.normals[3 * index.normal_index + 1],
+                    attrib.normals[3 * index.normal_index + 2]
+                };
+            }
+
+            if (index.texcoord_index >= 0) {
+                v.uv = {
+                    attrib.texcoords[2 * index.texcoord_index + 0],
+                    attrib.texcoords[2 * index.texcoord_index + 1]
+                };
+            }
+
+            if (unique_vertices.count(v) == 0) {
+                unique_vertices[v] = static_cast<uint32_t>(vertices.size());
+                vertices.push_back(v);
+            }
+
+            indices.push_back(unique_vertices[v]);
+        }
+    }
 }

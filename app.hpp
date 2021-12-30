@@ -16,7 +16,7 @@
 class app {
 public:
     static constexpr int WIDTH = 800;
-    static constexpr int HEIGHT = 800;
+    static constexpr int HEIGHT = 600;
 
     app();
     ~app();

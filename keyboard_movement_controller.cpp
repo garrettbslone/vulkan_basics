@@ -21,7 +21,7 @@ void keyboard_movement_controller::move_in_plane_xz(GLFWwindow *w, float dt, gam
     game_object_.transform_.rotation.y = glm::mod(game_object_.transform_.rotation.y, glm::two_pi<float>());
 
     float yaw = game_object_.transform_.rotation.y;
-    const glm::vec3 forward_dir{sin(yaw), 0.f, cos(yaw)};
+    const glm::vec3 forward_dir{glm::sin(yaw), 0.f, glm::cos(yaw)};
     const glm::vec3 right_dir{forward_dir.z, 0.f, -forward_dir.x};
     const glm::vec3 up_dir{0.f, -1.f, 0.f};
     glm::vec3 move_dir{0.f};
