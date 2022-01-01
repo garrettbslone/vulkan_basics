@@ -15,7 +15,9 @@
 
 struct global_ubo {
     glm::mat4 projection_view{1.f};
-    glm::vec3 light_direction = glm::normalize(glm::vec3{1.f, -3.f, -1.f});
+    glm::vec4 ambient_light_color{1.f, 1.f, 1.f, 0.02f}; // w is intensity
+    glm::vec4 light_position{-1.f}; // ignore w -- for alignment purposes
+    glm::vec4 light_color{1.f}; // w is intensity
 };
 
 app::app()
@@ -62,6 +64,7 @@ void app::run()
 //    c.set_view_direction(glm::vec3(0.f), glm::vec3(0.5f, 0.f, 10.f));
 
     auto viewer_object = game_object::create_game_object();
+    viewer_object.transform_.translation.z = -2.5f;
     keyboard_movement_controller camera_controller{};
 //    c.set_view_target(glm::vec3(-1.f, -2.f, 20.f), glm::vec3(0.f, 0.f, 5.f));
 
@@ -79,7 +82,7 @@ void app::run()
 
         float aspect = renderer_.get_aspect_ratio();
 //            c.set_orthographic_projection(-aspect, aspect, -1, 1, -1, 1);
-        c.set_perspective_projection(glm::radians(50.f), aspect, 0.1f, 10.f);
+        c.set_perspective_projection(glm::radians(50.f), aspect, 0.1f, 100.f);
 
         if (auto command_buffer = renderer_.begin_frame()) {
             int frame_index = renderer_.get_frame_index();
@@ -110,12 +113,30 @@ void app::run()
 
 void app::load_game_objects()
 {
-    shared_ptr<model> cube_model = model::create_model_from_file(device_, "models/smooth_vase.obj");
+    shared_ptr<model> obj_model = model::create_model_from_file(device_, "models/smooth_vase.obj");
 
-    auto cube = game_object::create_game_object();
-    cube.model_ = cube_model;
-    cube.transform_.translation = {0.f, 0.5f, 2.5f};
-    cube.transform_.scale = {2.5f, 2.5f, 2.5f};
+    auto smooth_vase = game_object::create_game_object();
+    smooth_vase.model_ = obj_model;
+    smooth_vase.transform_.translation = {-0.5f, 0.5f, 0.f};
+    smooth_vase.transform_.scale = {2.5f, 2.5f, 2.5f};
+    this->game_objects.push_back(move(smooth_vase));
 
-    this->game_objects.push_back(move(cube));
+
+    obj_model = model::create_model_from_file(device_, "models/flat_vase.obj");
+
+    auto flat_vase = game_object::create_game_object();
+    flat_vase.model_ = obj_model;
+    flat_vase.transform_.translation = {0.5f, 0.5f, 0.f};
+    flat_vase.transform_.scale = {2.5f, 2.5f, 2.5f};
+
+    this->game_objects.push_back(move(flat_vase));
+
+    obj_model = model::create_model_from_file(device_, "models/quad.obj");
+
+    auto floor = game_object::create_game_object();
+    floor.model_ = obj_model;
+    floor.transform_.translation = {0.f, 0.5f, 0.f};
+    floor.transform_.scale = {4.f, 2.5f, 4.f};
+
+    this->game_objects.push_back(move(floor));
 }
