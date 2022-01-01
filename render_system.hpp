@@ -17,7 +17,7 @@
 
 class render_system {
 public:
-    render_system(device &d, VkRenderPass render_pass);
+    render_system(device &d, VkRenderPass render_pass, VkDescriptorSetLayout gloat_set_layout);
     ~render_system();
 
     render_system(const render_system &) = delete;
@@ -26,7 +26,7 @@ public:
     void render_game_objects(frame_info &info, vector<game_object> &objects);
 
 private:
-    void create_pipeline_layout();
+    void create_pipeline_layout(VkDescriptorSetLayout gloat_set_layout);
     void create_pipeline(VkRenderPass render_pass);
 
     device &device_;

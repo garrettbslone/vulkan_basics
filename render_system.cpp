@@ -10,14 +10,14 @@
 #include <glm/gtc/constants.hpp>
 
 struct push_constant_data {
-    glm::mat4 transform{1.f};
+    glm::mat4 model_matrix{1.f};
     glm::mat4 normal_matrix{1.f};
 };
 
-render_system::render_system(device &d, VkRenderPass render_pass)
+render_system::render_system(device &d, VkRenderPass render_pass, VkDescriptorSetLayout gloat_set_layout)
     : device_{d}
 {
-    create_pipeline_layout();
+    create_pipeline_layout(gloat_set_layout);
     create_pipeline(render_pass);
 }
 
@@ -25,7 +25,7 @@ render_system::~render_system()
 {
     vkDestroyPipelineLayout(this->device_.dev(), this->pipeline_layout, nullptr);
 }
-void render_system::create_pipeline_layout()
+void render_system::create_pipeline_layout(VkDescriptorSetLayout gloat_set_layout)
 {
     VkPushConstantRange push_constant_range{};
 
@@ -33,11 +33,13 @@ void render_system::create_pipeline_layout()
     push_constant_range.offset = 0;
     push_constant_range.size = sizeof(push_constant_data);
 
+    vector<VkDescriptorSetLayout> descriptor_set_layouts{gloat_set_layout};
+
     VkPipelineLayoutCreateInfo pipeline_layout_info{};
 
     pipeline_layout_info.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-    pipeline_layout_info.setLayoutCount = 0;
-    pipeline_layout_info.pSetLayouts = nullptr;
+    pipeline_layout_info.setLayoutCount = static_cast<uint32_t>(descriptor_set_layouts.size());
+    pipeline_layout_info.pSetLayouts = descriptor_set_layouts.data();
     pipeline_layout_info.pushConstantRangeCount = 1;
     pipeline_layout_info.pPushConstantRanges = &push_constant_range;
 
@@ -66,13 +68,20 @@ void render_system::render_game_objects(frame_info &info, vector<game_object> &o
 {
     this->pipeline_->bind(info.command_buffer);
 
-    auto projection_view = info.c.get_projection() * info.c.get_view();
+    vkCmdBindDescriptorSets(
+        info.command_buffer,
+        VK_PIPELINE_BIND_POINT_GRAPHICS,
+        pipeline_layout,
+        0,
+        1,
+        &info.global_desctiptor_set,
+        0,
+        nullptr);
 
     for (auto &obj: objects) {
         push_constant_data push{};
 
-        auto model_matrix = obj.transform_.mat4();
-        push.transform = projection_view * model_matrix;
+        push.model_matrix = obj.transform_.mat4();
         push.normal_matrix = obj.transform_.normal_matrix();
 
         vkCmdPushConstants(

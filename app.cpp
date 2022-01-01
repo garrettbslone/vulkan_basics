@@ -20,6 +20,11 @@ struct global_ubo {
 
 app::app()
 {
+    global_pool = descriptor_pool::Builder(device_)
+        .setMaxSets(swap_chain::MAX_FRAMES_IN_FLIGHT)
+        .addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, swap_chain::MAX_FRAMES_IN_FLIGHT)
+        .build();
+
     load_game_objects();
 }
 
@@ -40,7 +45,19 @@ void app::run()
         ubo_buffers[i]->map();
     }
 
-    render_system system{this->device_, this->renderer_.get_swap_chain_render_pass()};
+    auto global_set_layout = descriptor_set_layout::Builder(device_)
+        .addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT)
+        .build();
+
+    vector<VkDescriptorSet> global_descriptor_sets(swap_chain::MAX_FRAMES_IN_FLIGHT);
+    for (auto i = 0; i < global_descriptor_sets.size(); i++) {
+        auto buffer_info = ubo_buffers[i]->descriptorInfo();
+        descriptor_writer(*global_set_layout, *global_pool)
+        .writeBuffer(0, &buffer_info)
+        .build(global_descriptor_sets[i]);
+    }
+
+    render_system system{this->device_, this->renderer_.get_swap_chain_render_pass(), global_set_layout->getDescriptorSetLayout()};
     camera c{};
 //    c.set_view_direction(glm::vec3(0.f), glm::vec3(0.5f, 0.f, 10.f));
 
@@ -70,7 +87,8 @@ void app::run()
                     frame_index,
                     frame_time,
                     command_buffer,
-                    c
+                    c,
+                    global_descriptor_sets[frame_index]
             };
 
             // update

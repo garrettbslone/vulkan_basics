@@ -10,6 +10,7 @@
 #include "model.hpp"
 #include "game_object.hpp"
 #include "renderer.hpp"
+#include "descriptors.hpp"
 
 #include <memory>
 
@@ -33,6 +34,7 @@ private:
     device device_{window_};
     renderer renderer_{window_, device_};
 
+    unique_ptr<descriptor_pool> global_pool{};
     vector<game_object> game_objects;
     //    pipeline pipeline_{&device_, pipeline::default_config_info(WIDTH, HEIGHT), "shaders/shader.vert.spv", "shaders/shader.frag.spv"};
 };

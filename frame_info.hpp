@@ -14,6 +14,7 @@ struct frame_info {
     float frame_time;
     VkCommandBuffer command_buffer;
     camera &c;
+    VkDescriptorSet global_desctiptor_set;
 };
 
 #endif //VK_BASICS_FRAME_INFO_HPP
