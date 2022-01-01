@@ -52,8 +52,8 @@ private:
     unique_ptr<swap_chain> swap_chain_;
     vector<VkCommandBuffer> command_buffers;
 
-    uint32_t current_image_index;
-    int current_frame_index;
+    uint32_t current_image_index{0};
+    int current_frame_index{0};
     bool is_frame_started{false};
 };
 

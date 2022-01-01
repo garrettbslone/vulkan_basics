@@ -64,7 +64,7 @@ void render_system::create_pipeline(VkRenderPass render_pass)
     );
 }
 
-void render_system::render_game_objects(frame_info &info, vector<game_object> &objects)
+void render_system::render_game_objects(frame_info &info)
 {
     this->pipeline_->bind(info.command_buffer);
 
@@ -78,7 +78,10 @@ void render_system::render_game_objects(frame_info &info, vector<game_object> &o
         0,
         nullptr);
 
-    for (auto &obj: objects) {
+    for (auto &[id, obj]: info.game_objects) {
+        if (!obj.model_)
+            continue;
+
         push_constant_data push{};
 
         push.model_matrix = obj.transform_.mat4();

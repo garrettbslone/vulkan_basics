@@ -48,7 +48,7 @@ void app::run()
     }
 
     auto global_set_layout = descriptor_set_layout::Builder(device_)
-        .addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT)
+        .addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS)
         .build();
 
     vector<VkDescriptorSet> global_descriptor_sets(swap_chain::MAX_FRAMES_IN_FLIGHT);
@@ -91,7 +91,8 @@ void app::run()
                     frame_time,
                     command_buffer,
                     c,
-                    global_descriptor_sets[frame_index]
+                    global_descriptor_sets[frame_index],
+                    this->game_objects
             };
 
             // update
@@ -102,7 +103,7 @@ void app::run()
 
             // render
             renderer_.begin_swap_chain_render_pass(command_buffer);
-            system.render_game_objects(info, this->game_objects);
+            system.render_game_objects(info);
             renderer_.end_swap_chain_render_pass(command_buffer);
             renderer_.end_frame();
         }
@@ -119,7 +120,7 @@ void app::load_game_objects()
     smooth_vase.model_ = obj_model;
     smooth_vase.transform_.translation = {-0.5f, 0.5f, 0.f};
     smooth_vase.transform_.scale = {2.5f, 2.5f, 2.5f};
-    this->game_objects.push_back(move(smooth_vase));
+    this->game_objects.emplace(smooth_vase.get_id(), move(smooth_vase));
 
 
     obj_model = model::create_model_from_file(device_, "models/flat_vase.obj");
@@ -129,7 +130,7 @@ void app::load_game_objects()
     flat_vase.transform_.translation = {0.5f, 0.5f, 0.f};
     flat_vase.transform_.scale = {2.5f, 2.5f, 2.5f};
 
-    this->game_objects.push_back(move(flat_vase));
+    this->game_objects.emplace(flat_vase.get_id(), move(flat_vase));
 
     obj_model = model::create_model_from_file(device_, "models/quad.obj");
 
@@ -138,5 +139,5 @@ void app::load_game_objects()
     floor.transform_.translation = {0.f, 0.5f, 0.f};
     floor.transform_.scale = {4.f, 2.5f, 4.f};
 
-    this->game_objects.push_back(move(floor));
+    this->game_objects.emplace(floor.get_id(), move(floor));
 }

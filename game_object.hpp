@@ -9,6 +9,7 @@
 
 #include <glm/gtc/matrix_transform.hpp>
 
+#include <unordered_map>
 #include <memory>
 
 struct transform_component {
@@ -23,6 +24,7 @@ struct transform_component {
 class game_object {
 public:
     using id_t = unsigned int;
+    using Map = std::unordered_map<id_t, game_object>;
 
     static game_object create_game_object()
     {

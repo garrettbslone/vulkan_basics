@@ -35,8 +35,7 @@ private:
     renderer renderer_{window_, device_};
 
     unique_ptr<descriptor_pool> global_pool{};
-    vector<game_object> game_objects;
-    //    pipeline pipeline_{&device_, pipeline::default_config_info(WIDTH, HEIGHT), "shaders/shader.vert.spv", "shaders/shader.frag.spv"};
+    game_object::Map game_objects;
 };
 
 #endif //VK_BASICS_APP_HPP

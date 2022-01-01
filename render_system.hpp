@@ -23,7 +23,7 @@ public:
     render_system(const render_system &) = delete;
     render_system &operator=(const render_system &) = delete;
 
-    void render_game_objects(frame_info &info, vector<game_object> &objects);
+    void render_game_objects(frame_info &info);
 
 private:
     void create_pipeline_layout(VkDescriptorSetLayout gloat_set_layout);
