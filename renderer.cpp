@@ -4,6 +4,7 @@
 
 #include "renderer.hpp"
 
+#include <array>
 #include <stdexcept>
 
 renderer::renderer(window &w, device &d)
